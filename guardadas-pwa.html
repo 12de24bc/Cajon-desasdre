@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Guardadas">
+<meta name="theme-color" content="#f7f5f0">
+<title>Guardadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════
+   TOKENS
+══════════════════════════════════ */
+:root {
+  --bg:      #f7f5f0;
+  --surface: #ffffff;
+  --border:  #e9e5dc;
+  --border2: #d6d0c4;
+  --ink:     #1c1a16;
+  --ink2:    #6b6760;
+  --ink3:    #b0aba2;
+  --accent:  #1c1a16;
+  --warm:    #f0ebe0;
+  --yellow:  #f2e442;
+  --green:   #c8ecd4;
+  --red:     #fde2e2;
+  --shadow1: 0 1px 6px rgba(0,0,0,.06);
+  --shadow2: 0 4px 18px rgba(0,0,0,.10);
+  --shadow3: 0 10px 36px rgba(0,0,0,.15);
+  --r:       16px;
+  --rsm:     10px;
+}
+
+/* ══════════════════════════════════
+   RESET + BASE
+══════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;overscroll-behavior:none}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'DM Sans',sans-serif; font-size:14px;
+  min-height:100vh; max-width:430px; margin:0 auto;
+  overscroll-behavior-y:contain;
+}
+img{display:block}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+
+/* ══════════════════════════════════
+   INSTALL BANNER
+══════════════════════════════════ */
+#installBanner{
+  display:none; position:fixed; bottom:80px; left:12px; right:12px;
+  background:var(--ink); color:#fff; border-radius:14px;
+  padding:14px 16px; z-index:200;
+  box-shadow:var(--shadow3); animation:slideUp .35s ease;
+}
+#installBanner.show{display:flex;align-items:center;gap:12px}
+.ib-icon{font-size:28px;flex-shrink:0}
+.ib-text{flex:1}
+.ib-title{font-weight:600;font-size:14px;margin-bottom:2px}
+.ib-sub{font-size:12px;opacity:.7}
+.ib-btn{background:var(--yellow);color:var(--ink);border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;white-space:nowrap}
+.ib-close{background:none;border:none;color:#fff;font-size:18px;opacity:.6;padding:4px}
+
+/* ══════════════════════════════════
+   HEADER
+══════════════════════════════════ */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 18px 8px;
+  position:sticky;top:0;background:var(--bg);z-index:50;
+}
+.hdr-brand{
+  font-family:'Playfair Display',serif;
+  font-style:italic; font-size:26px; letter-spacing:-.3px;
+}
+.hdr-right{display:flex;gap:8px}
+.hdr-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:all .15s;box-shadow:var(--shadow1);
+}
+.hdr-btn:hover{background:var(--ink);color:#fff}
+.hdr-btn:active{transform:scale(.92)}
+
+/* ══════════════════════════════════
+   SEARCH
+══════════════════════════════════ */
+.search-wrap{padding:0 18px 10px;display:none}
+.search-inner{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:12px;padding:10px 14px;box-shadow:var(--shadow1);
+}
+.search-inner input{
+  flex:1;background:none;border:none;outline:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);
+}
+.search-inner input::placeholder{color:var(--ink3)}
+
+/* ══════════════════════════════════
+   FILTER PILLS
+══════════════════════════════════ */
+.pills-row{
+  display:flex;gap:7px;padding:0 18px 16px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.pills-row::-webkit-scrollbar{display:none}
+.pill{
+  flex-shrink:0;padding:7px 14px;border-radius:50px;
+  border:1.5px solid var(--border);background:var(--surface);
+  font-size:12px;font-weight:600;color:var(--ink2);
+  transition:all .15s;white-space:nowrap;
+}
+.pill.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.pill:active{transform:scale(.95)}
+
+/* ══════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════ */
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2px 18px 12px;
+}
+.sec-title{font-size:16px;font-weight:600}
+.sec-action{font-size:12px;color:var(--ink2);font-weight:500;cursor:pointer}
+.sec-action:hover{color:var(--ink)}
+
+/* ══════════════════════════════════
+   COLLECTIONS GRID
+══════════════════════════════════ */
+.col-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;padding:0 18px 20px;
+}
+.col-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+  box-shadow:var(--shadow1);transition:all .2s;position:relative;
+}
+.col-card:hover{box-shadow:var(--shadow3);transform:translateY(-1px)}
+.col-card:active{transform:scale(.97)}
+.col-thumb-wrap{position:relative;width:100%;aspect-ratio:1;overflow:hidden}
+.col-thumb{width:100%;height:100%;object-fit:cover;background:var(--warm)}
+.col-thumb-ph{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;font-size:36px;
+  background:linear-gradient(135deg,#f5f1e8,#ede6d8);
+}
+.col-count-badge{
+  position:absolute;bottom:6px;right:6px;
+  background:rgba(0,0,0,.55);color:#fff;
+  font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:50px;backdrop-filter:blur(4px);
+}
+.col-edit-btn{
+  position:absolute;top:6px;right:6px;
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,.9);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;opacity:0;transition:opacity .2s;
+  box-shadow:var(--shadow1);
+}
+.col-card:hover .col-edit-btn{opacity:1}
+.col-info{padding:10px 12px 12px}
+.col-name{font-size:13px;font-weight:700;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-meta{font-size:11px;color:var(--ink2)}
+
+.add-col-card{
+  background:var(--surface);border:1.5px dashed var(--border2);
+  border-radius:var(--r);aspect-ratio:1/1.14;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;cursor:pointer;color:var(--ink2);transition:all .15s;
+}
+.add-col-card:hover{border-color:var(--ink);color:var(--ink);background:var(--warm)}
+.add-col-card:active{transform:scale(.96)}
+
+/* ══════════════════════════════════
+   MASONRY ITEMS
+══════════════════════════════════ */
+.masonry{columns:2;column-gap:10px;padding:0 18px 140px}
+.m-card{
+  break-inside:avoid;margin-bottom:10px;
+  background:var(--surface);border-radius:var(--r);overflow:hidden;
+  cursor:pointer;border:1px solid var(--border);box-shadow:var(--shadow1);
+  transition:all .2s;position:relative;
+  animation:popIn .28s ease both;
+}
+.m-card:nth-child(2n){animation-delay:.04s}
+.m-card:nth-child(3n){animation-delay:.08s}
+@keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.m-card:hover{box-shadow:var(--shadow2)}
+.m-card:active{transform:scale(.97)}
+.m-img{width:100%;max-height:180px;object-fit:cover;background:var(--warm)}
+.m-ph{
+  width:100%;aspect-ratio:.85;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;
+  background:linear-gradient(135deg,#f5f1e8,#ede6d8);
+}
+.m-body{padding:10px 11px 12px}
+.m-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:5px}
+.m-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.loc-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  background:#edf4f0;color:#2e7d52;
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:50px;
+}
+.type-dot{
+  font-size:10px;color:var(--ink2);font-weight:500;
+}
+.stars-sm{color:#f5b700;font-size:11px}
+.tag-pending{
+  background:var(--yellow);color:#111;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;
+}
+.m-fav{
+  position:absolute;top:7px;right:7px;
+  width:27px;height:27px;border-radius:50%;
+  background:rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;backdrop-filter:blur(4px);
+  box-shadow:var(--shadow1);transition:transform .15s;
+}
+.m-fav:hover{transform:scale(1.15)}
+
+/* ══════════════════════════════════
+   FAB
+══════════════════════════════════ */
+.fab{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;border-radius:50px;
+  padding:15px 28px;font-size:15px;font-weight:600;
+  box-shadow:0 6px 22px rgba(0,0,0,.28);
+  display:flex;align-items:center;gap:9px;
+  transition:all .2s;z-index:45;white-space:nowrap;
+}
+.fab:hover{background:#2c2a26;transform:translateX(-50%) translateY(-2px)}
+.fab:active{transform:translateX(-50%) scale(.95)}
+.fab-icon{font-size:20px;font-weight:300}
+
+/* ══════════════════════════════════
+   OVERLAY + SHEET
+══════════════════════════════════ */
+.ov{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.48);z-index:100;
+  align-items:flex-end;justify-content:center;
+}
+.ov.open{display:flex;animation:fadeOv .2s}
+@keyframes fadeOv{from{opacity:0}to{opacity:1}}
+.sheet{
+  width:100%;max-width:430px;
+  background:var(--surface);border-radius:24px 24px 0 0;
+  padding:10px 22px 46px;max-height:93vh;overflow-y:auto;
+  animation:slideUp .3s cubic-bezier(.3,.7,0,1);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.sh-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.sh-title{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:23px;margin-bottom:18px;letter-spacing:-.2px;
+}
+
+/* ══════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════ */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
+.fi{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 13px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);
+  outline:none;transition:border .18s;-webkit-appearance:none;
+}
+.fi:focus{border-color:var(--ink)}
+.fi::placeholder{color:var(--ink3)}
+textarea.fi{resize:vertical;min-height:68px}
+select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6760' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;appearance:none}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.url-wrap{position:relative}
+.url-wrap .fi{padding-right:80px}
+.url-fetch{
+  position:absolute;right:7px;top:50%;transform:translateY(-50%);
+  background:var(--ink);color:#fff;border-radius:7px;
+  padding:6px 12px;font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:5px;
+}
+.url-fetch:hover{background:#333}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spin.on{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.img-pre{width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:none;margin-top:8px}
+.img-pre.on{display:block}
+
+/* type chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  padding:7px 13px;border-radius:50px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--ink2);
+  transition:all .15s;cursor:pointer;
+}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip:active{transform:scale(.94)}
+
+/* stars */
+.stars-in{display:flex;gap:6px}
+.s{font-size:24px;cursor:pointer;color:var(--border);transition:color .1s}
+.s.on{color:#f5b700}
+
+/* sheet actions */
+.sh-acts{display:flex;gap:9px;margin-top:20px}
+.btn-g{
+  flex:1;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:11px;padding:13px;font-size:14px;font-weight:600;color:var(--ink2);
+  transition:all .15s;
+}
+.btn-g:hover{border-color:var(--ink);color:var(--ink)}
+.btn-b{
+  flex:2;background:var(--ink);border:none;
+  border-radius:11px;padding:13px;font-size:14px;font-weight:700;color:#fff;
+  transition:all .15s;
+}
+.btn-b:hover{background:#2c2a26}
+.btn-b:active{transform:scale(.97)}
+.btn-danger{background:var(--red);color:#c0392b;border-color:#f5c6c6}
+.btn-danger:hover{background:#c0392b;color:#fff;border-color:#c0392b}
+
+/* ══════════════════════════════════
+   COLLECTION EDIT SHEET
+══════════════════════════════════ */
+.col-photo-picker{
+  width:100%;aspect-ratio:2.5;border-radius:var(--r);
+  overflow:hidden;position:relative;cursor:pointer;
+  background:linear-gradient(135deg,#f5f1e8,#ede6d8);
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px dashed var(--border2);margin-bottom:6px;
+  transition:all .2s;
+}
+.col-photo-picker:hover{border-color:var(--ink)}
+.col-photo-picker img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.col-photo-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;color:#fff;
+}
+.col-photo-overlay span:first-child{font-size:28px}
+.col-photo-overlay span:last-child{font-size:13px;font-weight:600}
+.col-photo-hint{font-size:11px;color:var(--ink2);text-align:center;margin-bottom:14px}
+
+/* ══════════════════════════════════
+   MANAGE COLLECTIONS LIST
+══════════════════════════════════ */
+.manage-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.manage-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg);border-radius:12px;padding:10px 12px;
+  border:1px solid var(--border);
+}
+.manage-thumb{
+  width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.manage-thumb img{width:100%;height:100%;object-fit:cover}
+.manage-info{flex:1;min-width:0}
+.manage-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.manage-count{font-size:11px;color:var(--ink2)}
+.manage-acts{display:flex;gap:6px}
+.manage-btn{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  transition:all .15s;
+}
+.manage-btn:hover{background:var(--ink);color:#fff}
+.manage-btn.del:hover{background:#e63946;border-color:#e63946}
+
+/* ══════════════════════════════════
+   DETAIL SHEET
+══════════════════════════════════ */
+.det-img{width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin-bottom:14px}
+.det-ph{font-size:52px;text-align:center;padding:18px 0;display:block}
+.det-chip{
+  display:inline-block;background:var(--bg);padding:4px 12px;
+  border-radius:50px;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:10px;
+}
+.det-title{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:27px;line-height:1.15;margin-bottom:10px;
+}
+.det-notes{color:#666;line-height:1.75;font-size:14px;margin-bottom:14px}
+.det-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;font-size:13px;color:var(--ink2)}
+.det-link{color:var(--ink);font-weight:700;text-decoration:none;border-bottom:2px solid var(--ink)}
+.det-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.det-tag{background:var(--bg);border-radius:50px;padding:4px 12px;font-size:12px;color:var(--ink2);font-weight:500}
+.det-acts{display:flex;gap:8px;margin-top:20px}
+.det-btn{
+  flex:1;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:11px;padding:12px;font-size:13px;font-weight:600;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;
+}
+.det-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.det-btn.del:hover{background:#e63946;border-color:#e63946}
+
+/* ══════════════════════════════════
+   BACK BAR
+══════════════════════════════════ */
+.back-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;font-weight:700;font-size:16px;cursor:pointer;
+  position:sticky;top:0;background:var(--bg);z-index:50;
+}
+.back-bar:hover{opacity:.7}
+
+/* ══════════════════════════════════
+   SHARE / EXPORT
+══════════════════════════════════ */
+.share-card{
+  background:var(--bg);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border);
+}
+.share-card-title{font-weight:700;font-size:14px;margin-bottom:6px}
+.share-card p{font-size:12px;color:var(--ink2);line-height:1.6;margin-bottom:12px}
+.full-btn{
+  width:100%;border-radius:11px;padding:13px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  transition:all .15s;
+}
+.full-btn.dark{background:var(--ink);color:#fff;border:none}
+.full-btn.dark:hover{background:#2c2a26}
+.full-btn.light{background:var(--surface);color:var(--ink);border:1.5px solid var(--border)}
+.full-btn.light:hover{border-color:var(--ink)}
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+.toast{
+  position:fixed;bottom:88px;left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--ink);color:#fff;padding:11px 22px;
+  border-radius:50px;font-size:13px;font-weight:600;
+  z-index:999;opacity:0;transition:all .3s;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ══════════════════════════════════
+   EMPTY
+══════════════════════════════════ */
+.empty{text-align:center;padding:48px 20px;color:var(--ink2)}
+.empty .ei{font-size:44px;margin-bottom:12px;opacity:.4}
+.empty .et{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.empty .es{font-size:13px}
+
+/* ══════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════ */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border)}
+</style>
+</head>
+<body>
+
+<!-- ════════ INSTALL BANNER ════════ -->
+<div id="installBanner">
+  <div class="ib-icon">📱</div>
+  <div class="ib-text">
+    <div class="ib-title">Instalar app</div>
+    <div class="ib-sub">Añadir a pantalla de inicio</div>
+  </div>
+  <button class="ib-btn" id="installBtn">Instalar</button>
+  <button class="ib-close" id="installClose">✕</button>
+</div>
+
+<!-- ════════ MAIN VIEW ════════ -->
+<div id="mainView">
+  <div class="hdr">
+    <div class="hdr-brand">Guardadas</div>
+    <div class="hdr-right">
+      <div class="hdr-btn" onclick="toggleSearch()" id="searchToggle" title="Buscar">🔍</div>
+      <div class="hdr-btn" onclick="openManageCols()" title="Gestionar colecciones">⚙️</div>
+      <div class="hdr-btn" onclick="openShareSheet()" title="Exportar / Importar">↗</div>
+    </div>
+  </div>
+
+  <div class="search-wrap" id="searchWrap">
+    <div class="search-inner">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Buscar restaurante, curso, lugar..." oninput="renderMain()">
+      <span style="cursor:pointer;color:var(--ink2)" onclick="closeSearch()">✕</span>
+    </div>
+  </div>
+
+  <div class="pills-row" id="pillsRow"></div>
+  <div id="mainContent"></div>
+</div>
+
+<!-- ════════ COLLECTION VIEW ════════ -->
+<div id="colView" style="display:none">
+  <div class="back-bar" onclick="goMain()">
+    <span>←</span>
+    <span id="colViewLabel"></span>
+  </div>
+  <div id="colViewContent"></div>
+</div>
+
+<!-- ════════ FAB ════════ -->
+<button class="fab" onclick="openAdd()">
+  <span class="fab-icon">＋</span> Guardar
+</button>
+
+<!-- ════════ ADD/EDIT SHEET ════════ -->
+<div class="ov" id="addOv">
+ <div class="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-title" id="addShTitle">Guardar algo</div>
+
+  <!-- URL -->
+  <div class="fg">
+   <label class="fl">URL / enlace (opcional)</label>
+   <div class="url-wrap">
+    <input class="fi" type="url" id="fUrl" placeholder="Instagram, Maps, Pinterest, web...">
+    <button class="url-fetch" onclick="doFetchMeta()" id="fetchBtn">
+      <span id="fetchTxt">↓ Info</span>
+      <div class="spin" id="fetchSpin"></div>
+    </button>
+   </div>
+   <img class="img-pre" id="imgPre" src="" alt="">
+  </div>
+
+  <!-- TYPE -->
+  <div class="fg">
+   <label class="fl">Tipo</label>
+   <div class="chips" id="typeChips"></div>
+  </div>
+
+  <!-- TITLE + COL -->
+  <div class="fg">
+   <label class="fl">Nombre *</label>
+   <input class="fi" type="text" id="fName" placeholder="Ej: Casa Felipe, Curso de Notion...">
+  </div>
+
+  <div class="fi-row">
+   <div class="fg">
+    <label class="fl">Colección</label>
+    <select class="fi" id="fCol"></select>
+   </div>
+   <div class="fg">
+    <label class="fl">Ubicación</label>
+    <input class="fi" type="text" id="fLoc" placeholder="Madrid, Sierra...">
+   </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="fg">
+   <label class="fl">Notas</label>
+   <textarea class="fi" id="fNotes" placeholder="Recomendado por..., mejor el menú, precio aprox..."></textarea>
+  </div>
+
+  <!-- TAGS -->
+  <div class="fg">
+   <label class="fl">Etiquetas</label>
+   <input class="fi" type="text" id="fTags" placeholder="pendiente, imprescindible, verano">
+  </div>
+
+  <!-- RATING -->
+  <div class="fg">
+   <label class="fl">Valoración</label>
+   <div class="stars-in" id="starsIn">
+    <span class="s" data-v="1" onclick="setStar(1)">★</span>
+    <span class="s" data-v="2" onclick="setStar(2)">★</span>
+    <span class="s" data-v="3" onclick="setStar(3)">★</span>
+    <span class="s" data-v="4" onclick="setStar(4)">★</span>
+    <span class="s" data-v="5" onclick="setStar(5)">★</span>
+   </div>
+  </div>
+
+  <div class="sh-acts">
+   <button class="btn-g" onclick="closeAll()">Cancelar</button>
+   <button class="btn-b" onclick="saveItem()">Guardar →</button>
+  </div>
+ </div>
+</div>
+
+<!-- ════════ DETAIL SHEET ════════ -->
+<div class="ov" id="detOv">
+ <div class="sheet" id="detContent"></div>
+</div>
+
+<!-- ════════ EDIT COLLECTION SHEET ════════ -->
+<div class="ov" id="editColOv">
+ <div class="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-title" id="editColTitle">Editar colección</div>
+
+  <div class="fg">
+   <label class="fl">Foto de portada</label>
+   <div class="col-photo-picker" id="colPhotoPicker" onclick="triggerColPhoto()">
+    <img id="colPhotoPreview" src="" alt="" style="display:none">
+    <div class="col-photo-overlay" id="colPhotoOverlay">
+      <span>📷</span>
+      <span>Elige foto</span>
+    </div>
+   </div>
+   <div class="col-photo-hint">Desde tu galería o cámara. Se recorta automáticamente.</div>
+   <input type="file" id="colPhotoInput" accept="image/*" style="display:none" onchange="onColPhotoChange(event)">
+  </div>
+
+  <div class="fi-row">
+   <div class="fg">
+    <label class="fl">Emoji</label>
+    <input class="fi" type="text" id="ecEmoji" placeholder="⛰️" maxlength="4">
+   </div>
+   <div class="fg">
+    <label class="fl">Nombre</label>
+    <input class="fi" type="text" id="ecName" placeholder="Sierra, Cursos...">
+   </div>
+  </div>
+
+  <div class="sh-acts">
+   <button class="btn-g btn-danger" id="ecDeleteBtn" onclick="deleteCol()">🗑 Eliminar</button>
+   <button class="btn-b" onclick="saveCol()">Guardar →</button>
+  </div>
+ </div>
+</div>
+
+<!-- ════════ MANAGE COLLECTIONS SHEET ════════ -->
+<div class="ov" id="manageColsOv">
+ <div class="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-title">Mis colecciones</div>
+  <div class="manage-list" id="manageList"></div>
+  <button class="full-btn dark" onclick="closeAll();openNewColSheet()">＋ Nueva colección</button>
+  <div style="height:8px"></div>
+  <button class="full-btn light" onclick="closeAll()">Cerrar</button>
+ </div>
+</div>
+
+<!-- ════════ NEW COLLECTION SHEET ════════ -->
+<div class="ov" id="newColOv">
+ <div class="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-title">Nueva colección</div>
+
+  <div class="fg">
+   <label class="fl">Foto de portada (opcional)</label>
+   <div class="col-photo-picker" id="newColPhotoPicker" onclick="triggerNewColPhoto()">
+    <img id="newColPhotoPreview" src="" alt="" style="display:none">
+    <div class="col-photo-overlay" id="newColPhotoOverlay">
+      <span>📷</span><span>Elige foto</span>
+    </div>
+   </div>
+   <input type="file" id="newColPhotoInput" accept="image/*" style="display:none" onchange="onNewColPhotoChange(event)">
+  </div>
+
+  <div class="fi-row">
+   <div class="fg"><label class="fl">Emoji</label><input class="fi" type="text" id="ncEmoji" placeholder="📁" maxlength="4"></div>
+   <div class="fg"><label class="fl">Nombre *</label><input class="fi" type="text" id="ncName" placeholder="Ej: Sierra..."></div>
+  </div>
+
+  <div class="sh-acts">
+   <button class="btn-g" onclick="closeAll()">Cancelar</button>
+   <button class="btn-b" onclick="createCol()">Crear →</button>
+  </div>
+ </div>
+</div>
+
+<!-- ════════ SHARE SHEET ════════ -->
+<div class="ov" id="shareOv">
+ <div class="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-title">Compartir 📤</div>
+
+  <div class="share-card">
+   <div class="share-card-title">⬇ Exportar todo</div>
+   <p>Descarga un archivo con todas tus colecciones y guardadas. Compártelo por WhatsApp, AirDrop, Drive…</p>
+   <button class="full-btn dark" onclick="exportAll()">Descargar archivo .json</button>
+  </div>
+
+  <div class="share-card">
+   <div class="share-card-title">⬆ Importar</div>
+   <p>Importa un archivo de guardadas (tuyo o de alguien). Los nuevos se añaden sin borrar lo tuyo.</p>
+   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+   <button class="full-btn light" onclick="document.getElementById('importFile').click()">Elegir archivo</button>
+  </div>
+
+  <button class="full-btn light" style="margin-top:4px" onclick="closeAll()">Cerrar</button>
+ </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+<script>
+/* ─── TYPES ─── */
+const TYPES = [
+  {id:'restaurant',l:'🍽️ Restaurante'},
+  {id:'bar',       l:'🍸 Bar/Ocio'},
+  {id:'event',     l:'📅 Evento'},
+  {id:'shop',      l:'🛍️ Tienda'},
+  {id:'pin',       l:'📌 Pinterest'},
+  {id:'course',    l:'🎓 Curso'},
+  {id:'article',   l:'📰 Artículo/Repo'},
+  {id:'travel',    l:'✈️ Viaje'},
+  {id:'idea',      l:'💡 Idea'},
+  {id:'other',     l:'📎 Otro'},
+];
+const TE = Object.fromEntries(TYPES.map(t=>[t.id,t.l.split(' ')[0]]));
+
+/* ─── DEFAULT DATA ─── */
+const DEF_COLS = [
+  {id:'sierra',    name:'Sierra',         emoji:'⛰️', img:''},
+  {id:'madrid',    name:'Madrid',         emoji:'🏙️', img:''},
+  {id:'ocio',      name:'Fiestas & Ocio', emoji:'🎉', img:''},
+  {id:'cursos',    name:'Cursos & Refs',  emoji:'🎓', img:''},
+  {id:'pines',     name:'Pinterest',      emoji:'📌', img:''},
+  {id:'viajes',    name:'Viajes',         emoji:'✈️', img:''},
+  {id:'reportajes',name:'Reportajes',     emoji:'📰', img:''},
+  {id:'ideas',     name:'Ideas',          emoji:'💡', img:''},
+];
+
+const SIERRA_DATA = [
+  {loc:'Cercedilla',    names:['El rancho de Javi','Los Frutales - Asado','Asador de Angel']},
+  {loc:'Torrecaballero',names:['Casa Felipe']},
+  {loc:'Los Arroyos',   names:['El náutico']},
+  {loc:'Alpedrete',     names:['Mimo','El despacho','La gamberra']},
+  {loc:'Navacerrada',   names:['El rumba','La raclette','Casa Ochoa']},
+  {loc:'El Escorial',   names:['Cava baja y alta']},
+  {loc:'Torrelodones',  names:['La casa de Hook']},
+  {loc:'Segovia',       names:['Maribel (recom. Javi de Sacramenia)','Asador alto del León']},
+  {loc:'Guadarrama',    names:['El madrileño','Sala','Asador de Esther','La chimenea','Los Santanales','La calleja','Gio']},
+  {loc:'Moralzarzal',   names:['Huertas 33 - menú entre semana','El roma','El tablao','Tacos al ruedo','El fogón de los arrieros','La zalea']},
+  {loc:'Becerril',      names:['El albero','Las terrazas','Las cadenas']},
+  {loc:'Collado Mediano',names:['El rincón de la abuela']},
+  {loc:'Villalba',      names:['La vaquería']},
+];
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6)}
+
+function buildDefault(){
+  const items=[];
+  SIERRA_DATA.forEach(g=>{
+    g.names.forEach(n=>{
+      items.push({id:uid(),col:'sierra',type:'restaurant',title:n,notes:'',url:'',img:'',loc:g.loc,tags:['pendiente'],rating:0,fav:false,created:Date.now()-Math.random()*86400000*60});
+    });
+  });
+  items.push({id:uid(),col:'madrid',type:'restaurant',title:'Araia Restaurante',notes:'Comida, guardado desde Instagram',url:'https://www.instagram.com/araia_restaurante',img:'',loc:'Madrid',tags:['pendiente','comida'],rating:0,fav:false,created:Date.now()});
+  return {collections:DEF_COLS,items};
+}
+
+let DB = JSON.parse(localStorage.getItem('gd3_db')||'null') || buildDefault();
+function saveDB(){localStorage.setItem('gd3_db',JSON.stringify(DB))}
+
+/* ─── STATE ─── */
+let filter='all', curColId=null, editId=null, selType='restaurant', selRating=0, editColId=null, newColImg='', searchOpen=false;
+
+/* ════════════════
+   RENDER MAIN
+════════════════ */
+function renderMain(){
+  renderPills();
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+  const el=document.getElementById('mainContent');
+
+  if(filter==='favs'){
+    const its=DB.items.filter(i=>i.fav&&match(i,q));
+    el.innerHTML=sec('❤️ Favoritos',its);return;
+  }
+  if(filter==='pendiente'){
+    const its=DB.items.filter(i=>(i.tags||[]).includes('pendiente')&&match(i,q));
+    el.innerHTML=sec('⏳ Pendientes',its);return;
+  }
+  if(filter!=='all'){
+    const col=DB.collections.find(c=>c.id===filter);
+    const its=DB.items.filter(i=>i.col===filter&&match(i,q));
+    el.innerHTML=sec((col?.emoji||'')+' '+(col?.name||''),its);return;
+  }
+
+  // ALL
+  let html='';
+
+  // Collections grid
+  html+=`<div class="sec-hdr"><div class="sec-title">Colecciones</div><div class="sec-action" onclick="openManageCols()">⚙️ Gestionar</div></div>`;
+  html+=`<div class="col-grid">`;
+  DB.collections.forEach(col=>{
+    const cnt=DB.items.filter(i=>i.col===col.id).length;
+    const hasCover=col.img&&col.img.length>10;
+    html+=`<div class="col-card" onclick="openColView('${col.id}')">
+      <div class="col-thumb-wrap">
+        ${hasCover?`<img class="col-thumb" src="${col.img}" loading="lazy" alt="">`:
+          `<div class="col-thumb-ph">${col.emoji}</div>`}
+        <button class="col-edit-btn" onclick="event.stopPropagation();openEditCol('${col.id}')">✏️</button>
+        <div class="col-count-badge">${cnt}</div>
+      </div>
+      <div class="col-info">
+        <div class="col-name">${col.emoji} ${col.name}</div>
+        <div class="col-meta">🔒 Privada · ${cnt} guardados</div>
+      </div>
+    </div>`;
+  });
+  html+=`<div class="add-col-card" onclick="openNewColSheet()"><div style="font-size:26px">＋</div><div style="font-size:12px;font-weight:700">Nueva</div></div>`;
+  html+=`</div>`;
+
+  // Recents
+  const recent=[...DB.items].filter(i=>match(i,q)).sort((a,b)=>b.created-a.created);
+  if(recent.length){
+    html+=`<div class="sec-hdr" id="allAnchor"><div class="sec-title">Recientes</div><div class="sec-action">${recent.length} guardados</div></div>`;
+    html+=masonry(recent);
+  } else if(q){
+    html+=emptyHTML('Sin resultados','Prueba con otra búsqueda');
+  }
+
+  el.innerHTML=html;
+}
+
+function sec(title,items){
+  return`<div class="sec-hdr"><div class="sec-title">${title}</div></div>`+(items.length?masonry(items):emptyHTML());
+}
+
+function match(item,q){
+  if(!q)return true;
+  return[item.title,item.notes,item.loc,...(item.tags||[])].join(' ').toLowerCase().includes(q);
+}
+
+function masonry(items){
+  return`<div class="masonry">${items.map(cardHTML).join('')}</div>`;
+}
+
+function cardHTML(item){
+  const emoji=TE[item.type]||'📎';
+  const stars=item.rating?'★'.repeat(item.rating):'';
+  const pending=(item.tags||[]).includes('pendiente');
+  return`<div class="m-card" onclick="openDetail('${item.id}')">
+    ${item.img?`<img class="m-img" src="${item.img}" loading="lazy" onerror="this.style.display='none'" alt="">`:
+      `<div class="m-ph">${emoji}</div>`}
+    <div class="m-fav" onclick="event.stopPropagation();toggleFav('${item.id}')">${item.fav?'❤️':'🤍'}</div>
+    <div class="m-body">
+      <div class="m-name">${item.title}</div>
+      <div class="m-meta">
+        ${item.loc?`<span class="loc-pill">📍 ${item.loc}</span>`:''}
+        ${stars?`<span class="stars-sm">${stars}</span>`:''}
+        ${pending?`<span class="tag-pending">pendiente</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function emptyHTML(t='Nada aquí todavía',s='Pulsa + para guardar algo'){
+  return`<div class="empty"><div class="ei">🗂️</div><div class="et">${t}</div><div class="es">${s}</div></div>`;
+}
+
+function renderPills(){
+  const pills=[
+    {id:'all',l:'Todo'},
+    {id:'favs',l:'❤️ Favs'},
+    {id:'pendiente',l:'⏳ Pendientes'},
+    ...DB.collections.map(c=>({id:c.id,l:c.emoji+' '+c.name}))
+  ];
+  document.getElementById('pillsRow').innerHTML=pills.map(p=>
+    `<div class="pill ${filter===p.id?'active':''}" onclick="setFilter('${p.id}')">${p.l}</div>`
+  ).join('');
+}
+
+function setFilter(id){filter=id;renderMain()}
+
+/* ════════════════
+   COLLECTION VIEW
+════════════════ */
+function openColView(colId){
+  curColId=colId;
+  const col=DB.collections.find(c=>c.id===colId);
+  document.getElementById('colViewLabel').textContent=(col?.emoji||'')+' '+(col?.name||'');
+  const its=DB.items.filter(i=>i.col===colId).sort((a,b)=>{
+    if((a.loc||'')>(b.loc||''))return 1;
+    if((a.loc||'')<(b.loc||''))return -1;
+    return a.title.localeCompare(b.title);
+  });
+
+  // group by loc if >1 location
+  const locs=[...new Set(its.map(i=>i.loc||'—').filter(Boolean))];
+  let html='';
+  if(locs.length>1){
+    locs.sort().forEach(loc=>{
+      const g=its.filter(i=>(i.loc||'—')===loc);
+      html+=`<div style="padding:10px 18px 4px"><span class="loc-pill" style="font-size:12px;padding:4px 12px">📍 ${loc} <span style="opacity:.6">(${g.length})</span></span></div>`;
+      html+=masonry(g);
+    });
+  } else {
+    html=its.length?masonry(its):emptyHTML();
+  }
+  document.getElementById('colViewContent').innerHTML=html+`<div style="height:130px"></div>`;
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('colView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function goMain(){
+  curColId=null;
+  document.getElementById('colView').style.display='none';
+  document.getElementById('mainView').style.display='block';
+  renderMain();
+}
+
+/* ════════════════
+   MANAGE COLLECTIONS
+════════════════ */
+function openManageCols(){
+  renderManageList();
+  document.getElementById('manageColsOv').classList.add('open');
+}
+
+function renderManageList(){
+  const el=document.getElementById('manageList');
+  el.innerHTML=DB.collections.map(col=>{
+    const cnt=DB.items.filter(i=>i.col===col.id).length;
+    return`<div class="manage-row">
+      <div class="manage-thumb">
+        ${col.img&&col.img.length>10?`<img src="${col.img}" loading="lazy" alt="">`:col.emoji}
+      </div>
+      <div class="manage-info">
+        <div class="manage-name">${col.emoji} ${col.name}</div>
+        <div class="manage-count">${cnt} guardados</div>
+      </div>
+      <div class="manage-acts">
+        <button class="manage-btn" onclick="closeAll();openEditCol('${col.id}')" title="Editar">✏️</button>
+        <button class="manage-btn del" onclick="confirmDelCol('${col.id}')" title="Eliminar">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════
+   EDIT COLLECTION
+════════════════ */
+function openEditCol(colId){
+  editColId=colId;
+  const col=DB.collections.find(c=>c.id===colId);
+  if(!col)return;
+  document.getElementById('editColTitle').textContent='Editar: '+col.name;
+  document.getElementById('ecName').value=col.name;
+  document.getElementById('ecEmoji').value=col.emoji;
+  const prev=document.getElementById('colPhotoPreview');
+  const overlay=document.getElementById('colPhotoOverlay');
+  if(col.img&&col.img.length>10){
+    prev.src=col.img;prev.style.display='block';overlay.style.display='none';
+  } else {
+    prev.style.display='none';overlay.style.display='flex';
+  }
+  document.getElementById('editColOv').classList.add('open');
+}
+
+function triggerColPhoto(){document.getElementById('colPhotoInput').click()}
+
+function onColPhotoChange(e){
+  const file=e.target.files[0];if(!file)return;
+  resizeImage(file,600,r=>{
+    const prev=document.getElementById('colPhotoPreview');
+    const overlay=document.getElementById('colPhotoOverlay');
+    prev.src=r;prev.style.display='block';overlay.style.display='none';
+  });
+}
+
+function saveCol(){
+  if(!editColId)return;
+  const col=DB.collections.find(c=>c.id===editColId);
+  if(!col)return;
+  col.name=document.getElementById('ecName').value.trim()||col.name;
+  col.emoji=document.getElementById('ecEmoji').value.trim()||col.emoji;
+  const prev=document.getElementById('colPhotoPreview');
+  if(prev.style.display!=='none'&&prev.src)col.img=prev.src;
+  saveDB();closeAll();renderMain();
+  showToast('✓ Colección actualizada');
+}
+
+function deleteCol(){
+  if(!editColId)return;
+  const col=DB.collections.find(c=>c.id===editColId);
+  const cnt=DB.items.filter(i=>i.col===editColId).length;
+  if(!confirm(`¿Eliminar "${col?.name}"? ${cnt>0?`Los ${cnt} items de esta colección también se eliminarán.`:''}`))return;
+  DB.items=DB.items.filter(i=>i.col!==editColId);
+  DB.collections=DB.collections.filter(c=>c.id!==editColId);
+  saveDB();closeAll();renderMain();
+  showToast('🗑 Colección eliminada');
+}
+
+function confirmDelCol(colId){
+  editColId=colId;
+  deleteCol();
+}
+
+/* ════════════════
+   NEW COLLECTION
+════════════════ */
+function openNewColSheet(){
+  newColImg='';
+  document.getElementById('ncName').value='';
+  document.getElementById('ncEmoji').value='';
+  const prev=document.getElementById('newColPhotoPreview');
+  prev.src='';prev.style.display='none';
+  document.getElementById('newColPhotoOverlay').style.display='flex';
+  document.getElementById('newColOv').classList.add('open');
+  setTimeout(()=>document.getElementById('ncName').focus(),350);
+}
+
+function triggerNewColPhoto(){document.getElementById('newColPhotoInput').click()}
+
+function onNewColPhotoChange(e){
+  const file=e.target.files[0];if(!file)return;
+  resizeImage(file,600,r=>{
+    newColImg=r;
+    const prev=document.getElementById('newColPhotoPreview');
+    prev.src=r;prev.style.display='block';
+    document.getElementById('newColPhotoOverlay').style.display='none';
+  });
+}
+
+function createCol(){
+  const name=document.getElementById('ncName').value.trim();
+  if(!name){document.getElementById('ncName').focus();return}
+  const id=uid();
+  DB.collections.push({id,name,emoji:document.getElementById('ncEmoji').value.trim()||'📁',img:newColImg||''});
+  saveDB();closeAll();renderMain();
+  showToast('✓ Colección creada');
+}
+
+/* ════════════════
+   ADD / EDIT ITEM
+════════════════ */
+function openAdd(preCol){
+  editId=null;selRating=0;selType='restaurant';
+  document.getElementById('addShTitle').textContent='Guardar algo nuevo';
+  document.getElementById('fUrl').value='';
+  document.getElementById('fName').value='';
+  document.getElementById('fNotes').value='';
+  document.getElementById('fTags').value='pendiente';
+  document.getElementById('fLoc').value='';
+  document.getElementById('imgPre').src='';
+  document.getElementById('imgPre').classList.remove('on');
+  renderTypeChips('restaurant');
+  renderColSel(preCol||curColId||DB.collections[0]?.id);
+  setStar(0);
+  document.getElementById('addOv').classList.add('open');
+  setTimeout(()=>document.getElementById('fName').focus(),350);
+}
+
+function openEdit(id){
+  const item=DB.items.find(i=>i.id===id);
+  if(!item)return;
+  editId=id;selType=item.type;selRating=item.rating||0;
+  document.getElementById('addShTitle').textContent='Editar';
+  document.getElementById('fUrl').value=item.url||'';
+  document.getElementById('fName').value=item.title;
+  document.getElementById('fNotes').value=item.notes||'';
+  document.getElementById('fTags').value=(item.tags||[]).join(', ');
+  document.getElementById('fLoc').value=item.loc||'';
+  if(item.img){document.getElementById('imgPre').src=item.img;document.getElementById('imgPre').classList.add('on');}
+  else document.getElementById('imgPre').classList.remove('on');
+  renderTypeChips(item.type);
+  renderColSel(item.col);
+  setStar(item.rating||0);
+  document.getElementById('detOv').classList.remove('open');
+  document.getElementById('addOv').classList.add('open');
+}
+
+function renderTypeChips(sel){
+  selType=sel;
+  document.getElementById('typeChips').innerHTML=TYPES.map(t=>
+    `<div class="chip ${selType===t.id?'on':''}" onclick="pickType('${t.id}')">${t.l}</div>`
+  ).join('');
+}
+function pickType(id){renderTypeChips(id)}
+
+function renderColSel(sel){
+  document.getElementById('fCol').innerHTML=
+    DB.collections.map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${c.emoji} ${c.name}</option>`).join('')+
+    `<option value="__new">＋ Nueva colección</option>`;
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='fCol'&&e.target.value==='__new'){
+    document.getElementById('addOv').classList.remove('open');
+    openNewColSheet();
+  }
+});
+
+function saveItem(){
+  const title=document.getElementById('fName').value.trim();
+  if(!title){document.getElementById('fName').focus();return}
+  const tags=document.getElementById('fTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const colVal=document.getElementById('fCol').value;
+  const data={
+    col:colVal==='__new'?(DB.collections[0]?.id):colVal,
+    type:selType, title,
+    notes:document.getElementById('fNotes').value.trim(),
+    url:document.getElementById('fUrl').value.trim(),
+    loc:document.getElementById('fLoc').value.trim(),
+    img:document.getElementById('imgPre').classList.contains('on')?document.getElementById('imgPre').src:'',
+    tags, rating:selRating,
+  };
+  if(editId){
+    const idx=DB.items.findIndex(i=>i.id===editId);
+    DB.items[idx]={...DB.items[idx],...data};
+    showToast('✓ Actualizado');
+  } else {
+    DB.items.unshift({id:uid(),...data,fav:false,created:Date.now()});
+    showToast('✓ Guardado');
+  }
+  saveDB();closeAll();
+  if(curColId)openColView(curColId);else renderMain();
+}
+
+/* ════════════════
+   FETCH META
+════════════════ */
+async function doFetchMeta(){
+  let url=document.getElementById('fUrl').value.trim();
+  if(!url)return;
+  if(!url.startsWith('http'))url='https://'+url;
+  document.getElementById('fetchTxt').style.display='none';
+  document.getElementById('fetchSpin').classList.add('on');
+  try{
+    const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const data=await res.json();
+    const doc=new DOMParser().parseFromString(data.contents||'','text/html');
+    const ogT=doc.querySelector('meta[property="og:title"]')?.content||doc.querySelector('title')?.textContent||'';
+    const ogI=doc.querySelector('meta[property="og:image"]')?.content||'';
+    if(ogT&&!document.getElementById('fName').value)document.getElementById('fName').value=ogT.trim();
+    if(ogI){document.getElementById('imgPre').src=ogI;document.getElementById('imgPre').classList.add('on');}
+    if(url.includes('instagram'))pickType('restaurant');
+    else if(url.includes('pinterest'))pickType('pin');
+    else if(url.includes('youtube')||url.includes('udemy')||url.includes('coursera'))pickType('course');
+    showToast(ogT||ogI?'✓ Info obtenida':'Sin metadatos');
+  }catch(e){showToast('No se pudo obtener info')}
+  finally{
+    document.getElementById('fetchTxt').style.display='';
+    document.getElementById('fetchSpin').classList.remove('on');
+  }
+}
+
+/* ════════════════
+   DETAIL
+════════════════ */
+function openDetail(id){
+  const item=DB.items.find(i=>i.id===id);
+  if(!item)return;
+  const col=DB.collections.find(c=>c.id===item.col);
+  const tl=TYPES.find(t=>t.id===item.type)?.l||'📎 Otro';
+  const stars=item.rating?'★'.repeat(item.rating):'';
+  document.getElementById('detContent').innerHTML=`
+    <div class="sh-handle"></div>
+    ${item.img?`<img class="det-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:
+      `<span class="det-ph">${TE[item.type]||'📎'}</span>`}
+    <span class="det-chip">${tl}</span>
+    ${item.loc?`<span class="loc-pill" style="margin-left:6px;font-size:12px;padding:4px 12px">📍 ${item.loc}</span>`:''}
+    <div class="det-title">${item.title}</div>
+    ${item.notes?`<div class="det-notes">${item.notes}</div>`:''}
+    ${item.url?`<div class="det-row">🔗 <a class="det-link" href="${item.url.startsWith('http')?item.url:'https://'+item.url}" target="_blank">Abrir enlace ↗</a></div>`:''}
+    ${stars?`<div class="det-row" style="color:#f5b700;font-size:18px">${stars}</div>`:''}
+    ${col?`<div class="det-row" style="font-size:12px">${col.emoji} ${col.name}</div>`:''}
+    ${item.tags?.length?`<div class="det-tags">${item.tags.map(t=>`<span class="det-tag">${t}</span>`).join('')}</div>`:''}
+    <div style="font-size:11px;color:var(--ink2);margin-top:12px">Guardado ${new Date(item.created).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</div>
+    <div class="det-acts">
+      <button class="det-btn" style="flex:.6" onclick="toggleFav('${item.id}');closeAll()">${item.fav?'💔':'❤️'}</button>
+      <button class="det-btn" onclick="openEdit('${item.id}')">✏️</button>
+      <button class="det-btn del" onclick="deleteItem('${item.id}')">🗑</button>
+    </div>`;
+  document.getElementById('detOv').classList.add('open');
+}
+
+/* ════════════════
+   FAV / DELETE
+════════════════ */
+function toggleFav(id){
+  const item=DB.items.find(i=>i.id===id);
+  if(!item)return;
+  item.fav=!item.fav;saveDB();
+  if(curColId)openColView(curColId);else renderMain();
+  showToast(item.fav?'❤️ Favorito':'🤍 Quitado');
+}
+function deleteItem(id){
+  if(!confirm('¿Eliminar este item?'))return;
+  DB.items=DB.items.filter(i=>i.id!==id);
+  saveDB();closeAll();
+  if(curColId)openColView(curColId);else renderMain();
+  showToast('🗑 Eliminado');
+}
+
+/* ════════════════
+   STARS
+════════════════ */
+function setStar(v){
+  selRating=v;
+  document.querySelectorAll('.s').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=v));
+}
+
+/* ════════════════
+   SHARE / EXPORT
+════════════════ */
+function openShareSheet(){document.getElementById('shareOv').classList.add('open')}
+
+function exportAll(){
+  const json=JSON.stringify(DB,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='guardadas-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('✓ Archivo descargado');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const imp=JSON.parse(ev.target.result);
+      if(!imp.collections||!imp.items)throw new Error();
+      imp.collections.forEach(ic=>{if(!DB.collections.find(c=>c.id===ic.id))DB.collections.push(ic)});
+      const ids=new Set(DB.items.map(i=>i.id));
+      imp.items.forEach(ii=>{if(!ids.has(ii.id))DB.items.push(ii)});
+      saveDB();closeAll();renderMain();
+      showToast(`✓ ${imp.items.length} items importados`);
+    }catch{showToast('❌ Archivo inválido')}
+  };
+  r.readAsText(file);
+}
+
+/* ════════════════
+   IMAGE RESIZE
+════════════════ */
+function resizeImage(file,maxW,cb){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',.85));
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ════════════════
+   SEARCH
+════════════════ */
+function toggleSearch(){
+  searchOpen=!searchOpen;
+  const w=document.getElementById('searchWrap');
+  w.style.display=searchOpen?'block':'none';
+  if(searchOpen)document.getElementById('searchInput').focus();
+  else{document.getElementById('searchInput').value='';renderMain();}
+}
+function closeSearch(){
+  searchOpen=false;
+  document.getElementById('searchWrap').style.display='none';
+  document.getElementById('searchInput').value='';
+  renderMain();
+}
+
+/* ════════════════
+   UTILS
+════════════════ */
+function closeAll(){document.querySelectorAll('.ov').forEach(o=>o.classList.remove('open'))}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2300);
+}
+
+document.querySelectorAll('.ov').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)closeAll()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+
+/* ════════════════
+   PWA INSTALL
+════════════════ */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  setTimeout(()=>document.getElementById('installBanner').classList.add('show'),1500);
+});
+document.getElementById('installBtn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  document.getElementById('installBanner').classList.remove('show');
+  deferredPrompt=null;
+  if(outcome==='accepted')showToast('✓ App instalada 🎉');
+});
+document.getElementById('installClose').addEventListener('click',()=>{
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+// iOS install hint
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone;
+if(isIOS){
+  setTimeout(()=>{
+    const b=document.getElementById('installBanner');
+    b.querySelector('.ib-title').textContent='Instalar en iPhone';
+    b.querySelector('.ib-sub').textContent='Pulsa ↑ Compartir → "Añadir a inicio"';
+    b.querySelector('.ib-btn').style.display='none';
+    b.classList.add('show');
+  },2000);
+}
+
+/* ════════════════
+   SERVICE WORKER
+════════════════ */
+if('serviceWorker' in navigator){
+  const swCode=`
+const V='gd-v1';
+const ASSETS=['/'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS))));
+self.addEventListener('fetch',e=>e.respondWith(
+  caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('offline')))
+));
+`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+
+/* ════════════════
+   INIT
+════════════════ */
+renderMain();
+</script>
+</body>
+</html>
