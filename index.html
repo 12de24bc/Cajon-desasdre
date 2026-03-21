@@ -289,83 +289,166 @@ input,textarea,select{font-family:var(--sans);outline:none;-webkit-appearance:no
 }
 
 /* ═══════════════════════════════════════
-   GRID VIEW
+   GRID VIEW — Pinterest style
 ═══════════════════════════════════════ */
 .items-grid {
   columns: 3;
-  column-gap: 12px;
+  column-gap: 10px;
 }
-@media (max-width: 900px) { .items-grid { columns: 2; } }
+@media (max-width: 1100px) { .items-grid { columns: 3; } }
+@media (max-width: 800px)  { .items-grid { columns: 2; } }
 
+/* ── Card con foto: imagen llena todo, texto encima ── */
 .item-card {
   break-inside: avoid;
-  margin-bottom: 12px;
-  background: var(--paper2);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  margin-bottom: 10px;
+  border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color .15s, transform .15s;
-  animation: cardIn .25s ease both;
+  position: relative;
+  transition: transform .2s;
+  animation: cardIn .28s ease both;
+  background: var(--paper3);
 }
-.item-card:hover { border-color: var(--rule2); }
-.item-card:active { transform: scale(.98); }
-@keyframes cardIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.item-card:hover { transform: scale(1.015); }
+.item-card:active { transform: scale(.97); }
+@keyframes cardIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
 
+/* La imagen llena la card entera */
 .item-cover {
   width: 100%;
-  aspect-ratio: 4/3;
-  background: var(--paper3);
   position: relative;
   overflow: hidden;
+  display: block;
 }
-.item-cover img { width:100%;height:100%;object-fit:cover; }
+/* Alturas variables según posición — efecto masonry visual */
+.item-card:nth-child(3n+1) .item-cover { aspect-ratio: 3/4; }
+.item-card:nth-child(3n+2) .item-cover { aspect-ratio: 4/5; }
+.item-card:nth-child(3n+3) .item-cover { aspect-ratio: 2/3; }
+
+.item-cover img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s;
+}
+.item-card:hover .item-cover img { transform: scale(1.04); }
+
+/* Placeholder cuando no hay foto — card editorial limpia */
 .item-cover-ph {
-  width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;
+  width: 100%; height: 100%;
+  min-height: 160px;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: flex-end;
+  padding: 16px;
+  background: var(--paper3);
+  font-size: 32px;
 }
+
+/* Overlay degradado — solo cuando hay imagen */
+.item-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,.82) 0%,
+    rgba(0,0,0,.3) 45%,
+    rgba(0,0,0,0) 70%
+  );
+  pointer-events: none;
+}
+
+/* Texto encima de la foto */
+.item-body-over {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 12px 10px;
+  z-index: 2;
+}
+.item-body-over .item-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.25;
+  color: #fff;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+.item-body-over .item-loc {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(255,255,255,.6);
+  letter-spacing: .3px;
+  display: flex; align-items: center; gap: 3px;
+}
+
+/* Texto en placeholder sin foto */
+.item-body-plain {
+  padding: 10px 12px 12px;
+}
+.item-body-plain .item-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+.item-body-plain .item-loc {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 3px;
+}
+
 .item-type-badge {
   position: absolute;
-  bottom: 6px; left: 6px;
-  background: var(--ink);
-  color: var(--paper);
+  top: 8px; left: 8px;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  color: rgba(255,255,255,.9);
   font-family: var(--mono);
   font-size: 8px;
   letter-spacing: .8px;
   text-transform: uppercase;
   padding: 3px 7px;
   border-radius: 3px;
+  z-index: 3;
+}
+.item-type-badge-plain {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
 }
 .item-fav {
   position: absolute;
-  top: 6px; right: 6px;
-  width: 24px; height: 24px;
+  top: 8px; right: 8px;
+  width: 26px; height: 26px;
   border-radius: 50%;
-  background: rgba(13,13,13,.4);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.15);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
+  z-index: 3;
   transition: transform .15s;
 }
-.item-fav:hover { transform: scale(1.15); }
-.item-body { padding: 10px 12px 12px; }
-.item-title {
-  font-family: var(--serif);
-  font-size: 15px;
-  font-style: italic;
-  line-height: 1.3;
-  margin-bottom: 6px;
-  color: var(--ink);
+.item-fav:hover { transform: scale(1.18); }
+.item-fav.no-img {
+  background: var(--paper3);
+  border-color: var(--rule);
+  font-size: 11px;
 }
-.item-loc {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: .3px;
-  display: flex; align-items: center; gap: 4px;
-}
-.item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+
+/* Tags / pills */
+.item-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
 .tag {
   font-family: var(--mono);
   font-size: 9px;
@@ -1255,52 +1338,49 @@ const SEED_COLS=[
 ];
 
 const SEED_ITEMS=[
-  {col:'restaurantes',loc:'La Latina',title:'Casa Amadeo Los Caracoles',notes:'Especialidad en caracoles. Clásico de siempre.',tags:['pendiente','clásico']},
-  {col:'restaurantes',loc:'La Latina',title:'Casa Lucio',notes:'Huevos rotos. El clásico de Madrid.',tags:['pendiente','clásico']},
-  {col:'restaurantes',loc:'La Latina',title:'Bar La Campana',notes:'El bocadillo de calamares más famoso de Madrid.',tags:['pendiente','bocata']},
-  {col:'restaurantes',loc:'Malasaña',title:'Hopper',notes:'Más que tapeo — platitos con cócteles. Buen ambiente.',tags:['pendiente','cócteles']},
-  {col:'restaurantes',loc:'Malasaña',title:'Lamiak',notes:'Pintxos y buen ambiente.',tags:['pendiente','pintxos']},
-  {col:'restaurantes',loc:'Chueca',title:'Hattori Hanzo',notes:'Auténtico japonés en Gran Vía. Se come en el suelo.',tags:['pendiente','japonés']},
-  {col:'restaurantes',loc:'Centro',title:'La Bola',notes:'Cocido madrileño tradicional.',tags:['pendiente','cocido']},
-  {col:'restaurantes',loc:'Centro',title:'Gonmar',notes:'Las mejores bravas.',tags:['pendiente','bravas']},
-  {col:'restaurantes',loc:'Embajadores',title:'Chevichería ROKOTO',notes:'Desenfadado, de barra a mesa.',tags:['pendiente']},
-  {col:'restaurantes',loc:'Pozuelo de Alarcón',title:'Savaina Madrid',notes:'Un oasis a 15 min. @savainamadrid',url:'https://www.instagram.com/savainamadrid',tags:['pendiente']},
-  {col:'bares',loc:'Centro',title:'El viajero',notes:'Azotea con vistas. Merece la pena la espera.',tags:['pendiente','terraza','azotea']},
-  {col:'bares',loc:'Centro',title:'Metrópolis Rooftop',notes:'Terraza con vistas al edificio Metrópolis.',tags:['pendiente','terraza']},
-  {col:'planes',loc:'Madrid',title:'Sweetspace Museum',notes:'Museo experiencial.',tags:['pendiente','museo','plan']},
-  {col:'planes',loc:'Madrid',title:'La Muralla de Ávila',notes:'Torreznos y muralla.',tags:['pendiente','excursión']},
-  // Sierra
-  {col:'sierra',loc:'Cercedilla',title:'El rancho de Javi',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Cercedilla',title:'Los Frutales – Asado',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Torrecaballero',title:'Casa Felipe',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Alpedrete',title:'Mimo',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Alpedrete',title:'La gamberra',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Navacerrada',title:'La raclette',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Navacerrada',title:'Casa Ochoa',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Guadarrama',title:'El madrileño',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Guadarrama',title:'La chimenea',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Guadarrama',title:'Los Santanales',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Moralzarzal',title:'Huertas 33',notes:'Menú comida entre semana.',tags:['pendiente','menú del día']},
-  {col:'sierra',loc:'Moralzarzal',title:'La zalea',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Becerril',title:'El albero',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Becerril',title:'Las terrazas',notes:'',tags:['pendiente']},
-  {col:'sierra',loc:'Collado Mediano',title:"L'Humbre",notes:'Cocido maragato con rolito gastro. ~30€/persona. @lhumbre_restaurante',tags:['pendiente','cocido','30€']},
-  {col:'sierra',loc:'Collado Villalba',title:'Casa Bula',notes:'Cocido tradicional. ~20€/persona. @kandrak_restaurante',tags:['pendiente','cocido','20€']},
-  {col:'sierra',loc:'Segovia',title:'Maribel',notes:'Recomendado por Javi de Sacramenia.',tags:['pendiente']},
-  {col:'sierra',loc:'Segovia',title:'Asador alto del León',notes:'',tags:['pendiente']},
-  // Cádiz
-  {col:'cadiz',loc:'Barbate',title:'El Campero',notes:'El mejor atún de almadraba de España. Reservar con tiempo.',tags:['pendiente','atún','top']},
-  {col:'cadiz',loc:'Barbate',title:'Asador El Antojo – La Aceitera',notes:'Carne de retinto + almejas.',tags:['pendiente','carne']},
-  {col:'cadiz',loc:'El Palmar',title:'Alférez',notes:'Atún. Reservar con tiempo.',tags:['pendiente','atún']},
-  {col:'cadiz',loc:'El Palmar',title:'Puesta de sol chiringuitos',notes:'Sobre las 20:00 empieza música en directo.',tags:['pendiente','atardecer','música']},
-  {col:'cadiz',loc:'Zahora',title:'Venta Curro',notes:'Chocos, tortillitas, gambas.',tags:['pendiente','mariscos','top']},
-  {col:'cadiz',loc:'Zahora',title:'Amarna',notes:'Mojito y fiesta.',tags:['pendiente','fiesta','chiringuito']},
-  {col:'cadiz',loc:'Bolonia',title:'El Albero',notes:'Albóndigas de calamar, tortillas de arrastre, pescado de roca.',tags:['pendiente','pescado']},
-  {col:'cadiz',loc:'Tarifa',title:"La tétería de Tarifa",notes:'Fiesta / ambiente.',tags:['pendiente','fiesta']},
-  {col:'cadiz',loc:'Cádiz',title:'Hattori Hanzo Cádiz',notes:'Japonés.',tags:['pendiente','japonés']},
-  // Compra
-  {col:'compra',loc:'',title:'Lista de la compra semanal',notes:'',tags:['recurrente']},
-  {col:'compra',loc:'',title:'Recetas pendientes de probar',notes:'',tags:['recetas']},
+  {col:'restaurantes',loc:'La Latina',title:'Casa Amadeo Los Caracoles',notes:'Especialidad en caracoles. Clásico de siempre.',tags:['pendiente','clásico'],img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80'},
+  {col:'restaurantes',loc:'La Latina',title:'Casa Lucio',notes:'Huevos rotos. El clásico de Madrid.',tags:['pendiente','clásico'],img:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'},
+  {col:'restaurantes',loc:'La Latina',title:'Bar La Campana',notes:'El bocadillo de calamares más famoso de Madrid.',tags:['pendiente','bocata'],img:'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80'},
+  {col:'restaurantes',loc:'Malasaña',title:'Hopper',notes:'Más que tapeo — platitos con cócteles.',tags:['pendiente','cócteles'],img:'https://images.unsplash.com/photo-1514190051997-0f6f39ca5cde?w=400&q=80'},
+  {col:'restaurantes',loc:'Malasaña',title:'Lamiak',notes:'Pintxos y buen ambiente.',tags:['pendiente','pintxos'],img:'https://images.unsplash.com/photo-1551218372-a8789b81b253?w=400&q=80'},
+  {col:'restaurantes',loc:'Chueca',title:'Hattori Hanzo',notes:'Japonés en Gran Vía. Se come en el suelo.',tags:['pendiente','japonés'],img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&q=80'},
+  {col:'restaurantes',loc:'Centro',title:'La Bola',notes:'Cocido madrileño tradicional.',tags:['pendiente','cocido'],img:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80'},
+  {col:'restaurantes',loc:'Centro',title:'Gonmar',notes:'Las mejores bravas.',tags:['pendiente','bravas'],img:'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=400&q=80'},
+  {col:'restaurantes',loc:'Embajadores',title:'Chevichería ROKOTO',notes:'Desenfadado, de barra a mesa.',tags:['pendiente'],img:'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=400&q=80'},
+  {col:'restaurantes',loc:'Pozuelo de Alarcón',title:'Savaina Madrid',notes:'Un oasis a 15 min.',url:'https://www.instagram.com/savainamadrid',tags:['pendiente'],img:'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=400&q=80'},
+  {col:'bares',loc:'Centro',title:'El viajero',notes:'Azotea con vistas.',tags:['pendiente','terraza'],img:'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80'},
+  {col:'bares',loc:'Centro',title:'Metrópolis Rooftop',notes:'Terraza con vistas al edificio Metrópolis.',tags:['pendiente','terraza'],img:'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=400&q=80'},
+  {col:'planes',loc:'Madrid',title:'Sweetspace Museum',notes:'Museo experiencial.',tags:['pendiente','museo'],img:'https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=400&q=80'},
+  {col:'planes',loc:'Madrid',title:'La Muralla de Ávila',notes:'Torreznos y muralla.',tags:['pendiente','excursión'],img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'},
+  {col:'sierra',loc:'Cercedilla',title:'El rancho de Javi',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80'},
+  {col:'sierra',loc:'Cercedilla',title:'Los Frutales – Asado',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Torrecaballero',title:'Casa Felipe',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=400&q=80'},
+  {col:'sierra',loc:'Alpedrete',title:'Mimo',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Alpedrete',title:'La gamberra',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&q=80'},
+  {col:'sierra',loc:'Navacerrada',title:'La raclette',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1528736235302-52922df5c122?w=400&q=80'},
+  {col:'sierra',loc:'Navacerrada',title:'Casa Ochoa',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Guadarrama',title:'El madrileño',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1567364816519-cbc9c4ffe1eb?w=400&q=80'},
+  {col:'sierra',loc:'Guadarrama',title:'La chimenea',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&q=80'},
+  {col:'sierra',loc:'Guadarrama',title:'Los Santanales',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Moralzarzal',title:'Huertas 33',notes:'Menú comida entre semana.',tags:['pendiente','menú del día'],img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80'},
+  {col:'sierra',loc:'Moralzarzal',title:'La zalea',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Becerril',title:'El albero',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&q=80'},
+  {col:'sierra',loc:'Becerril',title:'Las terrazas',notes:'',tags:['pendiente'],img:''},
+  {col:'sierra',loc:'Collado Mediano',title:"L'Humbre",notes:'Cocido maragato. ~30€/persona.',tags:['pendiente','cocido','30€'],img:'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80'},
+  {col:'sierra',loc:'Collado Villalba',title:'Casa Bula',notes:'Cocido tradicional. ~20€/persona.',tags:['pendiente','cocido','20€'],img:''},
+  {col:'sierra',loc:'Segovia',title:'Maribel',notes:'Recomendado por Javi de Sacramenia.',tags:['pendiente'],img:'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=400&q=80'},
+  {col:'sierra',loc:'Segovia',title:'Asador alto del León',notes:'',tags:['pendiente'],img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80'},
+  {col:'cadiz',loc:'Barbate',title:'El Campero',notes:'El mejor atún de almadraba de España.',tags:['pendiente','atún','top'],img:'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=400&q=80'},
+  {col:'cadiz',loc:'Barbate',title:'Asador El Antojo',notes:'Carne de retinto + almejas.',tags:['pendiente','carne'],img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80'},
+  {col:'cadiz',loc:'El Palmar',title:'Alférez',notes:'Atún. Reservar con tiempo.',tags:['pendiente','atún'],img:'https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=400&q=80'},
+  {col:'cadiz',loc:'El Palmar',title:'Puesta de sol chiringuitos',notes:'A las 20:00 empieza música en directo.',tags:['pendiente','atardecer'],img:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80'},
+  {col:'cadiz',loc:'Zahora',title:'Venta Curro',notes:'Chocos, tortillitas, gambas.',tags:['pendiente','mariscos','top'],img:'https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&q=80'},
+  {col:'cadiz',loc:'Zahora',title:'Amarna',notes:'Mojito y fiesta.',tags:['pendiente','fiesta'],img:'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80'},
+  {col:'cadiz',loc:'Bolonia',title:'El Albero',notes:'Albóndigas de calamar, pescado de roca.',tags:['pendiente','pescado'],img:'https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=400&q=80'},
+  {col:'cadiz',loc:'Tarifa',title:"La tétería de Tarifa",notes:'Fiesta / ambiente.',tags:['pendiente','fiesta'],img:'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=400&q=80'},
+  {col:'cadiz',loc:'Cádiz',title:'Hattori Hanzo Cádiz',notes:'Japonés.',tags:['pendiente','japonés'],img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&q=80'},
+  {col:'compra',loc:'',title:'Lista de la compra semanal',notes:'',tags:['recurrente'],img:''},
+  {col:'compra',loc:'',title:'Recetas pendientes de probar',notes:'',tags:['recetas'],img:'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400&q=80'},
 ];
 
 /* ════════════════════════════════════════
@@ -1322,6 +1402,13 @@ function buildSeed(){
 }
 
 let DB=JSON.parse(localStorage.getItem('stash_v2')||'null')||buildSeed();
+// Si no tiene fotos en los items (versión antigua), resetear seed
+if(DB.items.length>0 && DB.items.slice(0,5).every(i=>!i.img)){
+  const oldAudios=DB.audios||[];
+  DB=buildSeed();
+  DB.audios=oldAudios;
+  saveDB();
+}
 function saveDB(){localStorage.setItem('stash_v2',JSON.stringify(DB))}
 
 /* ════════════════════════════════════════
@@ -1586,23 +1673,43 @@ function gridCard(item){
   const emoji=TE[item.type]||'📎';
   const stars=item.rating?'★'.repeat(item.rating):'';
   const pend=(item.tags||[]).includes('pendiente');
-  return `<div class="item-card" onclick="openDetail('${item.id}')">
-    <div class="item-cover">
-      ${item.img?`<img src="${item.img}" loading="lazy" onerror="this.style.display='none'">`:
-        `<div class="item-cover-ph">${emoji}</div>`}
-      <div class="item-fav" onclick="event.stopPropagation();toggleFav('${item.id}')">${item.fav?'♥':'♡'}</div>
-      ${item.type?`<div class="item-type-badge">${TYPES.find(t=>t.id===item.type)?.l.split(' ').slice(1).join(' ')||item.type}</div>`:''}
-    </div>
-    <div class="item-body">
-      <div class="item-title">${item.title}</div>
-      ${item.loc?`<div class="item-loc">📍 ${item.loc}</div>`:''}
-      <div class="item-tags">
-        ${stars?`<span class="tag" style="color:#f5b623">${stars}</span>`:''}
-        ${pend?`<span class="tag pendiente">pendiente</span>`:''}
-        ${item.fav?`<span class="tag fav">♥</span>`:''}
+  const typeName=TYPES.find(t=>t.id===item.type)?.l.split(' ').slice(1).join(' ')||'';
+  const hasImg=item.img&&item.img.length>10;
+
+  if(hasImg){
+    // ── CARD CON FOTO: imagen llena todo, texto encima ──
+    return `<div class="item-card" onclick="openDetail('${item.id}')">
+      <div class="item-cover">
+        <img src="${item.img}" loading="lazy" onerror="this.parentElement.parentElement.outerHTML=this.parentElement.parentElement.outerHTML.replace('item-cover','item-cover no-img-fallback')">
+        <div class="item-overlay"></div>
+        ${typeName?`<div class="item-type-badge">${typeName}</div>`:''}
+        <div class="item-fav" onclick="event.stopPropagation();toggleFav('${item.id}')">${item.fav?'♥':'♡'}</div>
+        <div class="item-body-over">
+          <div class="item-title">${item.title}</div>
+          ${item.loc?`<div class="item-loc">📍 ${item.loc}</div>`:''}
+        </div>
       </div>
-    </div>
-  </div>`;
+    </div>`;
+  } else {
+    // ── CARD SIN FOTO: editorial limpia con emoji grande ──
+    return `<div class="item-card" style="background:var(--paper2);border:1px solid var(--rule)" onclick="openDetail('${item.id}')">
+      <div class="item-cover" style="position:relative">
+        <div class="item-cover-ph">
+          <span style="font-size:36px;margin-bottom:8px">${emoji}</span>
+        </div>
+        <div class="item-fav no-img" onclick="event.stopPropagation();toggleFav('${item.id}')">${item.fav?'♥':'♡'}</div>
+      </div>
+      <div class="item-body-plain">
+        ${typeName?`<span class="item-type-badge-plain">${typeName}</span>`:''}
+        <div class="item-title">${item.title}</div>
+        ${item.loc?`<div class="item-loc">📍 ${item.loc}</div>`:''}
+        <div class="item-tags">
+          ${stars?`<span class="tag" style="color:#f5b623">${stars}</span>`:''}
+          ${pend?`<span class="tag pendiente">pendiente</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
 }
 
 function listCard(item){
